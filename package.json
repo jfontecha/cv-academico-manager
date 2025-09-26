@@ -1,0 +1,28 @@
+{
+  "name": "mern-collections-manager",
+  "version": "1.0.0",
+  "description": "Aplicación MERN para gestionar colecciones de MongoDB Cloud",
+  "main": "index.js",
+  "scripts": {
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "server": "cd backend && \"C:\\Program Files\\nodejs\\npm.cmd\" run dev",
+    "client": "cd frontend && \"C:\\Program Files\\nodejs\\npm.cmd\" start",
+    "build": "cd frontend && \"C:\\Program Files\\nodejs\\npm.cmd\" run build",
+    "install-server": "cd backend && \"C:\\Program Files\\nodejs\\npm.cmd\" install",
+    "install-client": "cd frontend && \"C:\\Program Files\\nodejs\\npm.cmd\" install",
+    "install-all": "\"C:\\Program Files\\nodejs\\npm.cmd\" install && npm run install-server && npm run install-client",
+    "heroku-postbuild": "npm run install-all && npm run build"
+  },
+  "keywords": [
+    "mern",
+    "mongodb",
+    "express",
+    "react",
+    "nodejs"
+  ],
+  "author": "jfontecha",
+  "license": "MIT",
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
