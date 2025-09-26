@@ -1,6 +1,6 @@
 # CV Académico - Gestor MERN
 
-Una aplicación completa con la pila MERN (MongoDB, Express.js, React, Node.js) para gestionar el CV académico personal con autenticación de usuarios.
+Una aplicación completa con la pila MERN (MongoDB, Express.js, React, Node.js) para gestionar el CV académico personal con autenticación de usuarios. Realizada en VS Code con el soporte de Copilot AI.
 
 ## Estructura del Proyecto
 
