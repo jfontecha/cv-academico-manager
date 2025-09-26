@@ -5,13 +5,16 @@
   "main": "index.js",
   "scripts": {
     "dev": "concurrently \"npm run server\" \"npm run client\"",
-    "server": "cd backend && \"C:\\Program Files\\nodejs\\npm.cmd\" run dev",
-    "client": "cd frontend && \"C:\\Program Files\\nodejs\\npm.cmd\" start",
-    "build": "cd frontend && \"C:\\Program Files\\nodejs\\npm.cmd\" run build",
-    "install-server": "cd backend && \"C:\\Program Files\\nodejs\\npm.cmd\" install",
-    "install-client": "cd frontend && \"C:\\Program Files\\nodejs\\npm.cmd\" install",
-    "install-all": "\"C:\\Program Files\\nodejs\\npm.cmd\" install && npm run install-server && npm run install-client",
-    "heroku-postbuild": "npm run install-all && npm run build"
+    "server": "cd backend && npm run dev",
+    "client": "cd frontend && npm start",
+    "build": "cd frontend && npm run build",
+    "start": "cd backend && npm start",
+    "install-server": "cd backend && npm install",
+    "install-client": "cd frontend && npm install",
+    "install-all": "npm install && npm run install-server && npm run install-client",
+    "heroku-postbuild": "npm run install-all && npm run build",
+    "render-build": "npm run install-server",
+    "render-start": "cd backend && npm start"
   },
   "keywords": [
     "mern",
