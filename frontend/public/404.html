@@ -2,22 +2,22 @@
 <html lang="es">
   <head>
     <meta charset="utf-8" />
-    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
+    <link rel="icon" href="/favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#000000" />
     <meta
       name="description"
-      content="CV Académico Manager - Aplicación MERN para gestionar CV académico"
+      content="Aplicación MERN para gestionar colecciones de MongoDB"
     />
-    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
-    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
-    <title>CV Académico Manager</title>
+    <link rel="apple-touch-icon" href="/logo192.png" />
+    <link rel="manifest" href="/manifest.json" />
+    <title>MERN Collections Manager</title>
     <script>
-      // Handle SPA routing for direct URL access
+      // Redirect 404 to index.html for SPA routing
       (function() {
         var redirect = sessionStorage.redirect;
         delete sessionStorage.redirect;
-        if (redirect && redirect !== location.href) {
+        if (redirect && redirect != location.href) {
           history.replaceState(null, null, redirect);
         }
       })();
@@ -26,5 +26,11 @@
   <body>
     <noscript>Necesitas habilitar JavaScript para ejecutar esta aplicación.</noscript>
     <div id="root"></div>
+    <script>
+      // Store the current path in sessionStorage for 404 handling
+      if (location.pathname !== '/') {
+        sessionStorage.redirect = location.href;
+      }
+    </script>
   </body>
 </html>
