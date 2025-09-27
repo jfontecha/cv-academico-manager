@@ -192,7 +192,7 @@ const TeachingInnovation = () => {
         )}
       </div>
     </div>
-  ), [handleDelete, formatDate]);
+  ), [handleDelete, formatDate, canEdit, canDelete]);
 
   // Memoizar la sección de encabezado para que no se re-renderice
   const headerSection = useMemo(() => (
@@ -246,7 +246,8 @@ const TeachingInnovation = () => {
     filters.sortBy, 
     filters.itemsPerPage,
     innovations.length,
-    totalItems
+    totalItems,
+    canCreate
   ]);
 
   return (

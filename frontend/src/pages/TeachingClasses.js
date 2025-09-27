@@ -201,7 +201,7 @@ const TeachingClasses = () => {
         )}
       </div>
     </div>
-  ), [handleDelete, getClassTypeColor, getTypeLabel, getSemesterLabel]);
+  ), [handleDelete, getClassTypeColor, getTypeLabel, getSemesterLabel, canEdit, canDelete]);
 
   // Memoizar la sección de encabezado para que no se re-renderice
   const headerSection = useMemo(() => (
@@ -247,6 +247,7 @@ const TeachingClasses = () => {
       />
     </div>
   ), [
+    canCreate,
     handleSearchChange, 
     handleSortChange, 
     handleItemsPerPageChange, 

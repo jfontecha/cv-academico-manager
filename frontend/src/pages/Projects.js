@@ -215,7 +215,7 @@ const Projects = () => {
         )}
       </div>
     </div>
-  ), [handleDelete, formatDate, formatCurrency]);
+  ), [handleDelete, formatDate, formatCurrency, canEdit, canDelete]);
 
   // Memoizar la sección de encabezado para que no se re-renderice
   const headerSection = useMemo(() => (
@@ -263,6 +263,7 @@ const Projects = () => {
       />
     </div>
   ), [
+    canCreate,
     handleSearchChange, 
     handleSortChange, 
     handleItemsPerPageChange, 

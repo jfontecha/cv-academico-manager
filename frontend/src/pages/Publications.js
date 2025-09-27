@@ -221,7 +221,7 @@ const Publications = () => {
         )}
       </div>
     </div>
-  ), [handleDelete, getTypeColor, getTypeLabel]);
+  ), [handleDelete, getTypeColor, getTypeLabel, canEdit, canDelete]);
 
   // Memoizar la sección de encabezado para que no se re-renderice
   const headerSection = useMemo(() => (
@@ -282,6 +282,7 @@ const Publications = () => {
       />
     </div>
   ), [
+    canCreate,
     handleSearchChange, 
     handleSortChange, 
     handleTypeFilterChange, 

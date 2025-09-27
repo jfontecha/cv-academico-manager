@@ -200,7 +200,7 @@ const FinalWorks = () => {
         )}
       </div>
     </div>
-  ), [handleDelete, getTypeColor, getTypeLabel, formatDate]);
+  ), [handleDelete, getTypeColor, getTypeLabel, formatDate, canEdit, canDelete]);
 
 
 
@@ -265,6 +265,7 @@ const FinalWorks = () => {
       />
     </div>
   ), [
+    canCreate,
     handleSearchChange, 
     handleSortChange, 
     handleTypeFilterChange,
