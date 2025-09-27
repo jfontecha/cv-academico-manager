@@ -1,0 +1,11 @@
+# Redirects for React Router (SPA)
+# This file handles client-side routing for React applications
+
+# Redirect all routes to index.html for React Router to handle
+/*    /index.html   200
+
+# API calls should go to backend (if needed)
+/api/*  https://cv-academico-manager.onrender.com/api/:splat  200
+
+# Static assets should be served normally
+/static/*  /static/:splat  200
