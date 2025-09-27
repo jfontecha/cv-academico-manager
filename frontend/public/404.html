@@ -7,30 +7,29 @@
     <meta name="theme-color" content="#000000" />
     <meta
       name="description"
-      content="Aplicación MERN para gestionar colecciones de MongoDB"
+      content="CV Académico Manager - Redirigiendo..."
     />
-    <link rel="apple-touch-icon" href="/logo192.png" />
-    <link rel="manifest" href="/manifest.json" />
-    <title>MERN Collections Manager</title>
+    <title>CV Académico Manager - Redirigiendo...</title>
     <script>
-      // Redirect 404 to index.html for SPA routing
+      // Immediate redirect to index.html with original path
       (function() {
-        var redirect = sessionStorage.redirect;
-        delete sessionStorage.redirect;
-        if (redirect && redirect != location.href) {
-          history.replaceState(null, null, redirect);
+        var currentPath = window.location.pathname + window.location.search + window.location.hash;
+        console.log('404 página detectada, redirigiendo desde:', currentPath);
+        
+        // Store the original path for the SPA router to handle
+        if (currentPath !== '/' && currentPath !== '/index.html') {
+          sessionStorage.setItem('redirect', currentPath);
         }
+        
+        // Immediate redirect to the root
+        window.location.replace('/');
       })();
     </script>
   </head>
   <body>
-    <noscript>Necesitas habilitar JavaScript para ejecutar esta aplicación.</noscript>
-    <div id="root"></div>
-    <script>
-      // Store the current path in sessionStorage for 404 handling
-      if (location.pathname !== '/') {
-        sessionStorage.redirect = location.href;
-      }
-    </script>
+    <div style="font-family: Arial, sans-serif; text-align: center; padding: 50px;">
+      <h2>Redirigiendo...</h2>
+      <p>Si no eres redirigido automáticamente, <a href="/">haz clic aquí</a>.</p>
+    </div>
   </body>
 </html>

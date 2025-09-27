@@ -1,1 +1,9 @@
+# API calls should not be redirected
+/api/*  /api/:splat  200
+
+# Static assets should not be redirected
+/static/*  /static/:splat  200
+/images/*  /images/:splat  200
+
+# All other routes should go to index.html for SPA routing
 /*    /index.html   200

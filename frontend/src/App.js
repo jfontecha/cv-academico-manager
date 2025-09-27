@@ -1,5 +1,5 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, useNavigate, useLocation } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import Layout from './components/Layout';
 import ProtectedRoute, { AdminRoute } from './components/ProtectedRoute';
@@ -18,10 +18,29 @@ import Users from './pages/Users';
 import UserForm from './pages/UserForm';
 import Login from './pages/Login';
 
+// Componente para manejar la redirección desde 404
+function RedirectHandler() {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    // Verificar si hay una redirección pendiente desde 404.html
+    const redirectPath = sessionStorage.getItem('redirect');
+    if (redirectPath && location.pathname === '/') {
+      sessionStorage.removeItem('redirect');
+      console.log('Redirigiendo a:', redirectPath);
+      navigate(redirectPath, { replace: true });
+    }
+  }, [navigate, location]);
+
+  return null;
+}
+
 function App() {
   return (
     <AuthProvider>
       <Router>
+        <RedirectHandler />
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/*" element={
