@@ -8,6 +8,54 @@ const TeachingInnovation = require('../models/TeachingInnovation');
 const FinalWork = require('../models/FinalWork');
 const auth = require('../middleware/auth');
 
+// @route   GET /api/pdf/health
+// @desc    Verificar que Puppeteer esté funcionando
+// @access  Public
+router.get('/health', async (req, res) => {
+  try {
+    console.log('🔍 Verificando salud de Puppeteer...');
+    
+    const browser = await puppeteer.launch({
+      headless: 'new',
+      args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage',
+        '--disable-accelerated-2d-canvas',
+        '--no-first-run',
+        '--no-zygote',
+        '--single-process',
+        '--disable-gpu'
+      ]
+    });
+
+    const version = await browser.version();
+    await browser.close();
+
+    console.log('✅ Puppeteer funcionando correctamente, versión:', version);
+    
+    res.json({
+      success: true,
+      message: 'Puppeteer está funcionando correctamente',
+      version: version,
+      timestamp: new Date().toISOString()
+    });
+
+  } catch (error) {
+    console.error('❌ Error en verificación de Puppeteer:', {
+      message: error.message,
+      stack: error.stack
+    });
+    
+    res.status(500).json({
+      success: false,
+      message: 'Error en Puppeteer',
+      error: error.message,
+      timestamp: new Date().toISOString()
+    });
+  }
+});
+
 // @route   GET /api/pdf/generate
 // @desc    Generar PDF completo del currículum
 // @access  Private
@@ -31,10 +79,19 @@ router.get('/generate', auth, async (req, res) => {
       finalWorks
     });
 
-    // Generar PDF con Puppeteer
+    // Generar PDF con Puppeteer - Configuración para producción
     const browser = await puppeteer.launch({
       headless: 'new',
-      args: ['--no-sandbox', '--disable-setuid-sandbox']
+      args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage',
+        '--disable-accelerated-2d-canvas',
+        '--no-first-run',
+        '--no-zygote',
+        '--single-process',
+        '--disable-gpu'
+      ]
     });
 
     const page = await browser.newPage();
@@ -70,10 +127,15 @@ router.get('/generate', auth, async (req, res) => {
     res.end(finalBuffer, 'binary');
 
   } catch (error) {
-    console.error('Error al generar PDF:', error);
+    console.error('❌ Error detallado al generar PDF autenticado:', {
+      message: error.message,
+      stack: error.stack,
+      name: error.name
+    });
     res.status(500).json({
       success: false,
-      message: 'Error al generar el PDF'
+      message: 'Error al generar el PDF',
+      error: process.env.NODE_ENV === 'development' ? error.message : 'Error interno del servidor'
     });
   }
 });
@@ -101,10 +163,19 @@ router.get('/public', async (req, res) => {
       finalWorks
     });
 
-    // Generar PDF con Puppeteer
+    // Generar PDF con Puppeteer - Configuración para producción
     const browser = await puppeteer.launch({
       headless: 'new',
-      args: ['--no-sandbox', '--disable-setuid-sandbox']
+      args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage',
+        '--disable-accelerated-2d-canvas',
+        '--no-first-run',
+        '--no-zygote',
+        '--single-process',
+        '--disable-gpu'
+      ]
     });
 
     const page = await browser.newPage();
@@ -140,10 +211,15 @@ router.get('/public', async (req, res) => {
     res.end(finalBuffer, 'binary');
 
   } catch (error) {
-    console.error('Error al generar PDF:', error);
+    console.error('❌ Error detallado al generar PDF público:', {
+      message: error.message,
+      stack: error.stack,
+      name: error.name
+    });
     res.status(500).json({
       success: false,
-      message: 'Error al generar el PDF'
+      message: 'Error al generar el PDF',
+      error: process.env.NODE_ENV === 'development' ? error.message : 'Error interno del servidor'
     });
   }
 });

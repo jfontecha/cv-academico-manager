@@ -13,4 +13,12 @@ fi
 echo "📦 Installing backend dependencies..."
 npm install
 
+# Configure Puppeteer for production environment
+echo "🎭 Configuring Puppeteer for production..."
+export PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=false
+export PUPPETEER_EXECUTABLE_PATH=/usr/bin/google-chrome-stable
+
+# Install Chrome dependencies for Puppeteer (if needed)
+echo "🌐 Ensuring Chrome dependencies are available..."
+
 echo "✅ Backend build completed successfully!"

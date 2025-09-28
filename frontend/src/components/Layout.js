@@ -99,8 +99,24 @@ const Layout = ({ children }) => {
       console.log('✅ PDF descargado exitosamente');
       
     } catch (error) {
-      console.error('Error al generar PDF:', error);
-      alert(`Error al generar el PDF: ${error.message || 'Error desconocido'}. Por favor, intenta de nuevo.`);
+      console.error('❌ Error detallado al generar PDF:', error);
+      
+      // Extraer mensaje de error más específico si está disponible
+      let errorMessage = 'Error desconocido';
+      if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      } else if (error.response?.data?.error) {
+        errorMessage = error.response.data.error;
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
+      // Mostrar información más detallada en caso de error 500
+      if (error.response?.status === 500) {
+        errorMessage = `Error del servidor (500): ${errorMessage}. Esto puede deberse a un problema con Puppeteer en producción.`;
+      }
+      
+      alert(`Error al generar el PDF: ${errorMessage}. Por favor, intenta de nuevo.`);
     } finally {
       setIsGeneratingPDF(false);
     }
