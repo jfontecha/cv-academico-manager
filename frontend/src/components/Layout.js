@@ -17,7 +17,7 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useLastUpdate, formatLastUpdate, getCollectionFriendlyName } from '../hooks/useStats';
-import { generateCVPDF, generateCVPDFPublic } from '../services/api';
+import { generateCVPDF, generateCVPDFPublic, generateCVPDFAlt, checkPDFHealth } from '../services/api';
 
 const Layout = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -48,15 +48,37 @@ const Layout = ({ children }) => {
       setIsGeneratingPDF(true);
       console.log('Iniciando generación de PDF...');
       
-      // Primero probar con el endpoint autenticado, luego con el público
+      // Probar múltiples métodos de generación de PDF
       let response;
       try {
         response = await generateCVPDF();
-        console.log('PDF autenticado generado exitosamente');
+        console.log('✅ PDF autenticado generado exitosamente');
       } catch (authError) {
-        console.log('Error con PDF autenticado, probando versión pública...', authError);
-        response = await generateCVPDFPublic();
-        console.log('PDF público generado exitosamente');
+        console.log('⚠️ Error con PDF autenticado, probando versión pública...', authError);
+        
+        try {
+          response = await generateCVPDFPublic();
+          console.log('✅ PDF público generado exitosamente');
+        } catch (publicError) {
+          console.log('⚠️ Error con PDF público, probando método alternativo...', publicError);
+          
+          try {
+            response = await generateCVPDFAlt();
+            console.log('✅ PDF alternativo generado exitosamente');
+          } catch (altError) {
+            console.error('❌ Todos los métodos de PDF fallaron');
+            
+            // Combinar información de todos los errores
+            const authErrorMessage = authError.response?.data?.message || authError.message;
+            const publicErrorMessage = publicError.response?.data?.message || publicError.message;
+            const altErrorMessage = altError.response?.data?.message || altError.message;
+            
+            throw new Error(`Todos los métodos de generación de PDF fallaron:
+            1. Autenticado: ${authErrorMessage}
+            2. Público: ${publicErrorMessage}
+            3. Alternativo: ${altErrorMessage}`);
+          }
+        }
       }
       
       console.log('Respuesta recibida:', {

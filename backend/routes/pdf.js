@@ -1,12 +1,37 @@
 const express = require('express');
 const router = express.Router();
 const puppeteer = require('puppeteer');
+const pdf = require('html-pdf');
 const Publication = require('../models/Publication');
 const Project = require('../models/Project');
 const TeachingClass = require('../models/TeachingClass');
 const TeachingInnovation = require('../models/TeachingInnovation');
 const FinalWork = require('../models/FinalWork');
 const auth = require('../middleware/auth');
+
+// Función alternativa para generar PDF usando html-pdf
+async function generatePDFWithHtmlPdf(htmlContent) {
+  return new Promise((resolve, reject) => {
+    const options = {
+      format: 'A4',
+      border: {
+        top: '20mm',
+        right: '15mm',
+        bottom: '20mm',
+        left: '15mm'
+      },
+      timeout: 60000
+    };
+    
+    pdf.create(htmlContent, options).toBuffer((err, buffer) => {
+      if (err) {
+        reject(err);
+      } else {
+        resolve(buffer);
+      }
+    });
+  });
+}
 
 // @route   GET /api/pdf/health
 // @desc    Verificar que Puppeteer esté funcionando
@@ -21,12 +46,13 @@ router.get('/health', async (req, res) => {
         '--no-sandbox',
         '--disable-setuid-sandbox',
         '--disable-dev-shm-usage',
-        '--disable-accelerated-2d-canvas',
+        '--disable-gpu',
+        '--disable-extensions',
         '--no-first-run',
-        '--no-zygote',
-        '--single-process',
-        '--disable-gpu'
-      ]
+        '--disable-default-apps',
+        '--disable-features=VizDisplayCompositor'
+      ],
+      timeout: 30000
     });
 
     const version = await browser.version();
@@ -56,11 +82,13 @@ router.get('/health', async (req, res) => {
   }
 });
 
-// @route   GET /api/pdf/generate
-// @desc    Generar PDF completo del currículum
+// @route   GET /api/pdf/generate-alt
+// @desc    Generar PDF usando html-pdf como alternativa
 // @access  Private
-router.get('/generate', auth, async (req, res) => {
+router.get('/generate-alt', auth, async (req, res) => {
   try {
+    console.log('🔍 Iniciando generación de PDF alternativo (html-pdf)...');
+    
     // Obtener todos los datos
     const [publications, projects, teachingClasses, teachingInnovation, finalWorks] = await Promise.all([
       Publication.find().sort({ year_publication: -1 }),
@@ -69,6 +97,14 @@ router.get('/generate', auth, async (req, res) => {
       TeachingInnovation.find().sort({ year: -1 }),
       FinalWork.find().sort({ defense_date: -1 })
     ]);
+
+    console.log('📊 Datos obtenidos para PDF alternativo:', {
+      publications: publications.length,
+      projects: projects.length,
+      teachingClasses: teachingClasses.length,
+      teachingInnovation: teachingInnovation.length,
+      finalWorks: finalWorks.length
+    });
 
     // Generar HTML para el PDF
     const htmlContent = generateCurriculumHTML({
@@ -79,24 +115,97 @@ router.get('/generate', auth, async (req, res) => {
       finalWorks
     });
 
-    // Generar PDF con Puppeteer - Configuración para producción
+    console.log('📝 HTML generado para PDF alternativo, longitud:', htmlContent.length);
+
+    // Generar PDF con html-pdf
+    console.log('📋 Generando PDF con html-pdf...');
+    const pdfBuffer = await generatePDFWithHtmlPdf(htmlContent);
+
+    console.log('✅ PDF alternativo generado exitosamente, tamaño:', pdfBuffer.length, 'bytes');
+
+    // Configurar headers para descarga
+    res.set({
+      'Content-Type': 'application/pdf',
+      'Content-Disposition': 'attachment; filename="curriculum_jesus_fontecha_alt.pdf"',
+      'Content-Length': pdfBuffer.length,
+      'Cache-Control': 'no-cache'
+    });
+
+    res.end(pdfBuffer, 'binary');
+
+  } catch (error) {
+    console.error('❌ Error detallado al generar PDF alternativo:', {
+      message: error.message,
+      stack: error.stack,
+      name: error.name
+    });
+    res.status(500).json({
+      success: false,
+      message: 'Error al generar el PDF alternativo',
+      error: process.env.NODE_ENV === 'development' ? error.message : 'Error interno del servidor'
+    });
+  }
+});
+
+// @route   GET /api/pdf/generate
+// @desc    Generar PDF completo del currículum
+// @access  Private
+router.get('/generate', auth, async (req, res) => {
+  try {
+    console.log('🔍 Iniciando generación de PDF autenticado...');
+    
+    // Obtener todos los datos
+    const [publications, projects, teachingClasses, teachingInnovation, finalWorks] = await Promise.all([
+      Publication.find().sort({ year_publication: -1 }),
+      Project.find().sort({ start_date: -1 }),
+      TeachingClass.find().sort({ academic_year: -1 }),
+      TeachingInnovation.find().sort({ year: -1 }),
+      FinalWork.find().sort({ defense_date: -1 })
+    ]);
+
+    console.log('📊 Datos obtenidos:', {
+      publications: publications.length,
+      projects: projects.length,
+      teachingClasses: teachingClasses.length,
+      teachingInnovation: teachingInnovation.length,
+      finalWorks: finalWorks.length
+    });
+
+    // Generar HTML para el PDF
+    const htmlContent = generateCurriculumHTML({
+      publications,
+      projects,
+      teachingClasses,
+      teachingInnovation,
+      finalWorks
+    });
+
+    console.log('📝 HTML generado, longitud:', htmlContent.length);
+
+    // Generar PDF con Puppeteer - Configuración optimizada para Render
+    console.log('🚀 Lanzando Puppeteer...');
     const browser = await puppeteer.launch({
       headless: 'new',
       args: [
         '--no-sandbox',
         '--disable-setuid-sandbox',
         '--disable-dev-shm-usage',
-        '--disable-accelerated-2d-canvas',
+        '--disable-gpu',
+        '--disable-extensions',
         '--no-first-run',
-        '--no-zygote',
-        '--single-process',
-        '--disable-gpu'
-      ]
+        '--disable-default-apps',
+        '--disable-features=VizDisplayCompositor'
+      ],
+      timeout: 30000
     });
 
+    console.log('📄 Creando nueva página...');
     const page = await browser.newPage();
+    
+    console.log('🔧 Configurando página...');
     await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
     
+    console.log('📋 Generando PDF...');
     const pdfBuffer = await page.pdf({
       format: 'A4',
       printBackground: true,
@@ -108,9 +217,10 @@ router.get('/generate', auth, async (req, res) => {
       }
     });
 
+    console.log('🔒 Cerrando navegador...');
     await browser.close();
 
-    console.log('PDF autenticado generado exitosamente, tamaño:', pdfBuffer.length, 'bytes');
+    console.log('✅ PDF autenticado generado exitosamente, tamaño:', pdfBuffer.length, 'bytes');
     console.log('Tipo de pdfBuffer:', typeof pdfBuffer, 'Es Buffer:', Buffer.isBuffer(pdfBuffer));
 
     // Asegurar que es un Buffer
@@ -145,6 +255,8 @@ router.get('/generate', auth, async (req, res) => {
 // @access  Public
 router.get('/public', async (req, res) => {
   try {
+    console.log('🔍 Iniciando generación de PDF público...');
+    
     // Obtener todos los datos
     const [publications, projects, teachingClasses, teachingInnovation, finalWorks] = await Promise.all([
       Publication.find().sort({ year_publication: -1 }),
@@ -153,6 +265,14 @@ router.get('/public', async (req, res) => {
       TeachingInnovation.find().sort({ year: -1 }),
       FinalWork.find().sort({ defense_date: -1 })
     ]);
+
+    console.log('📊 Datos obtenidos:', {
+      publications: publications.length,
+      projects: projects.length,
+      teachingClasses: teachingClasses.length,
+      teachingInnovation: teachingInnovation.length,
+      finalWorks: finalWorks.length
+    });
 
     // Generar HTML para el PDF
     const htmlContent = generateCurriculumHTML({
@@ -163,24 +283,32 @@ router.get('/public', async (req, res) => {
       finalWorks
     });
 
-    // Generar PDF con Puppeteer - Configuración para producción
+    console.log('📝 HTML generado, longitud:', htmlContent.length);
+
+    // Generar PDF con Puppeteer - Configuración optimizada para Render
+    console.log('🚀 Lanzando Puppeteer...');
     const browser = await puppeteer.launch({
       headless: 'new',
       args: [
         '--no-sandbox',
         '--disable-setuid-sandbox',
         '--disable-dev-shm-usage',
-        '--disable-accelerated-2d-canvas',
+        '--disable-gpu',
+        '--disable-extensions',
         '--no-first-run',
-        '--no-zygote',
-        '--single-process',
-        '--disable-gpu'
-      ]
+        '--disable-default-apps',
+        '--disable-features=VizDisplayCompositor'
+      ],
+      timeout: 30000
     });
 
+    console.log('📄 Creando nueva página...');
     const page = await browser.newPage();
+    
+    console.log('🔧 Configurando página...');
     await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
     
+    console.log('📋 Generando PDF...');
     const pdfBuffer = await page.pdf({
       format: 'A4',
       printBackground: true,
@@ -192,9 +320,10 @@ router.get('/public', async (req, res) => {
       }
     });
 
+    console.log('🔒 Cerrando navegador...');
     await browser.close();
 
-    console.log('PDF público generado exitosamente, tamaño:', pdfBuffer.length, 'bytes');
+    console.log('✅ PDF público generado exitosamente, tamaño:', pdfBuffer.length, 'bytes');
     console.log('Tipo de pdfBuffer:', typeof pdfBuffer, 'Es Buffer:', Buffer.isBuffer(pdfBuffer));
 
     // Asegurar que es un Buffer

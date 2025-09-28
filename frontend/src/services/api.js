@@ -138,6 +138,15 @@ export const pdfAPI = {
       'Accept': 'application/pdf'
     }
   }),
+  // Verificar salud de Puppeteer
+  checkHealth: () => api.get('/pdf/health'),
+  // Generación alternativa con html-pdf
+  generateCVAlt: () => api.get('/pdf/generate-alt', { 
+    responseType: 'blob',
+    headers: {
+      'Accept': 'application/pdf'
+    }
+  }),
 };
 
 export default api;
@@ -191,3 +200,5 @@ export const getLastUpdate = () => statsAPI.getLastUpdate();
 // PDF
 export const generateCVPDF = () => pdfAPI.generateCV();
 export const generateCVPDFPublic = () => pdfAPI.generateCVPublic();
+export const generateCVPDFAlt = () => pdfAPI.generateCVAlt();
+export const checkPDFHealth = () => pdfAPI.checkHealth();
