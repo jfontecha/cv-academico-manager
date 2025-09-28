@@ -262,6 +262,43 @@ const Layout = ({ children }) => {
                 </div>
               </nav>
             </div>
+            
+            {/* Información del usuario y botón de logout para móvil */}
+            <div className="flex-shrink-0 border-t border-gray-200 p-4">
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center">
+                  <Shield className={`h-5 w-5 ${isAdmin() ? 'text-red-500' : 'text-blue-500'}`} />
+                  <span className="ml-2 text-sm text-gray-600">{user?.username}</span>
+                </div>
+                <span className={`px-2 py-1 text-xs rounded-full ${
+                  user?.role === 'admin' 
+                    ? 'bg-red-100 text-red-800' 
+                    : user?.role === 'moderator'
+                    ? 'bg-yellow-100 text-yellow-800'
+                    : user?.role === 'guest'
+                    ? 'bg-blue-100 text-blue-800'
+                    : 'bg-gray-100 text-gray-800'
+                }`}>
+                  {user?.role === 'admin' 
+                    ? 'Admin' 
+                    : user?.role === 'moderator'
+                    ? 'Moderador'
+                    : user?.role === 'guest'
+                    ? 'Invitado'
+                    : 'Usuario'}
+                </span>
+              </div>
+              <button
+                onClick={() => {
+                  logout();
+                  setSidebarOpen(false);
+                }}
+                className="w-full flex items-center justify-center px-3 py-2 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-colors duration-200"
+              >
+                <LogOut className="h-4 w-4 mr-2" />
+                Cerrar Sesión
+              </button>
+            </div>
           </div>
         </div>
       )}
