@@ -18,7 +18,8 @@ const ProjectForm = () => {
     end_date: '',
     budget: '',
     description: '',
-    url: ''
+    url: '',
+    role: 'Investigador'
   });
 
   const [loading, setLoading] = useState(false);
@@ -45,7 +46,8 @@ const ProjectForm = () => {
         end_date: project.end_date ? project.end_date.split('T')[0] : '',
         budget: project.budget || '',
         description: project.description || '',
-        url: project.url || ''
+        url: project.url || '',
+        role: project.role || 'Investigador'
       });
     } catch (err) {
       setError('Error al cargar el proyecto');
@@ -185,6 +187,24 @@ const ProjectForm = () => {
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
               placeholder="Investigador Principal"
             />
+          </div>
+
+          {/* Rol */}
+          <div>
+            <label htmlFor="role" className="block text-sm font-medium text-gray-700 mb-2">
+              Rol en el Proyecto
+            </label>
+            <select
+              id="role"
+              name="role"
+              value={formData.role}
+              onChange={handleChange}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+            >
+              <option value="Investigador">Investigador</option>
+              <option value="IP">IP (Investigador Principal)</option>
+              <option value="Otro">Otro</option>
+            </select>
           </div>
 
           {/* Presupuesto */}

@@ -50,6 +50,11 @@ const projectSchema = new mongoose.Schema({
     type: String,
     trim: true,
     match: [/^https?:\/\/.+/, 'URL inválida']
+  },
+  role: {
+    type: String,
+    enum: ['IP', 'Investigador', 'Otro'],
+    default: 'Investigador'
   }
 }, {
   timestamps: true

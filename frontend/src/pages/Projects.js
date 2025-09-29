@@ -12,6 +12,7 @@ const Projects = () => {
   // Estados para filtros (no causan re-render de resultados)
   const [filters, setFilters] = useState({
     search: '',
+    role: '',
     sortBy: 'start_date_desc',
     currentPage: 1,
     itemsPerPage: 20
@@ -52,6 +53,10 @@ const Projects = () => {
       // Solo agregar parámetros no vacíos
       if (filters.search && filters.search.trim()) {
         params.search = filters.search.trim();
+      }
+
+      if (filters.role && filters.role.trim()) {
+        params.role = filters.role.trim();
       }
       
       console.log('Fetching projects with params:', params); // Debug log
@@ -100,6 +105,11 @@ const Projects = () => {
   const handleSearchChange = useCallback((value) => {
     console.log('Search change:', value); // Debug log
     updateFilters({ search: value, currentPage: 1 });
+  }, [updateFilters]);
+
+  const handleRoleChange = useCallback((value) => {
+    console.log('Role change:', value); // Debug log
+    updateFilters({ role: value, currentPage: 1 });
   }, [updateFilters]);
 
   const handleSortChange = useCallback((value) => {
@@ -157,6 +167,12 @@ const Projects = () => {
             {project.funding_agency && (
               <div>
                 <span className="font-medium">Entidad Financiadora:</span> {project.funding_agency}
+              </div>
+            )}
+
+            {project.role && (
+              <div>
+                <span className="font-medium">Rol:</span> {project.role}
               </div>
             )}
 
@@ -237,6 +253,18 @@ const Projects = () => {
         sortBy={filters.sortBy}
         onSortChange={handleSortChange}
         searchPlaceholder="Buscar por título, descripción..."
+        additionalFilters={[
+          {
+            value: filters.role,
+            onChange: handleRoleChange,
+            options: [
+              { value: '', label: 'Todos los roles' },
+              { value: 'IP', label: 'IP (Investigador Principal)' },
+              { value: 'Investigador', label: 'Investigador' },
+              { value: 'Otro', label: 'Otro' }
+            ]
+          }
+        ]}
         sortOptions={[
           { value: 'start_date_desc', label: 'Inicio más reciente' },
           { value: 'start_date_asc', label: 'Inicio más antiguo' },
@@ -266,9 +294,11 @@ const Projects = () => {
     canCreate,
     handleSearchChange, 
     handleSortChange, 
-    handleItemsPerPageChange, 
+    handleItemsPerPageChange,
+    handleRoleChange,
     filters.sortBy, 
     filters.itemsPerPage,
+    filters.role,
     projects.length,
     totalItems
   ]);

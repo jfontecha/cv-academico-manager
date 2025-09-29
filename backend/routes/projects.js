@@ -28,6 +28,7 @@ router.get('/', async (req, res) => {
       limit = 10, 
       search = '', 
       year = '',
+      role = '',
       sortBy = 'start_date',
       sortOrder = 'desc'
     } = req.query;
@@ -60,6 +61,11 @@ router.get('/', async (req, res) => {
           { end_date: { $gte: startYear, $lte: endYear } }
         ];
       }
+    }
+
+    // Filtrar por rol
+    if (role && role.trim()) {
+      filters.role = role.trim();
     }
 
     // Configurar ordenamiento
@@ -115,6 +121,9 @@ router.get('/stats', async (req, res) => {
 
     const totalProjects = await Project.countDocuments();
     const totalBudget = await Project.aggregate([
+      {
+        $match: { role: 'IP' }
+      },
       {
         $group: {
           _id: null,
@@ -183,7 +192,8 @@ router.post('/', [
   body('funding_agency').trim().notEmpty().withMessage('La entidad financiadora es requerida'),
   body('principal_investigator').trim().notEmpty().withMessage('El investigador principal es requerido'),
   body('start_date').isISO8601().withMessage('Fecha de inicio inválida'),
-  body('end_date').isISO8601().withMessage('Fecha de finalización inválida')
+  body('end_date').isISO8601().withMessage('Fecha de finalización inválida'),
+  body('role').optional().isIn(['IP', 'Investigador', 'Otro']).withMessage('El rol debe ser IP, Investigador o Otro')
 ], handleValidationErrors, async (req, res) => {
   try {
     const project = new Project(req.body);
@@ -211,7 +221,8 @@ router.put('/:id', [
   authorize('admin', 'moderator', 'user'),
   body('title').optional().trim().notEmpty().withMessage('El título no puede estar vacío'),
   body('start_date').optional().isISO8601().withMessage('Fecha de inicio inválida'),
-  body('end_date').optional().isISO8601().withMessage('Fecha de finalización inválida')
+  body('end_date').optional().isISO8601().withMessage('Fecha de finalización inválida'),
+  body('role').optional().isIn(['IP', 'Investigador', 'Otro']).withMessage('El rol debe ser IP, Investigador o Otro')
 ], handleValidationErrors, async (req, res) => {
   try {
     const project = await Project.findByIdAndUpdate(

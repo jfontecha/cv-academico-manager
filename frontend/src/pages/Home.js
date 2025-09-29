@@ -151,10 +151,12 @@ const Home = () => {
           finalWorksByType[work.type] = (finalWorksByType[work.type] || 0) + 1;
         });
         
-        // Calcular suma total de presupuestos
-        const totalBudget = allProjects.data.data.reduce((sum, project) => {
-          return sum + (project.budget || 0);
-        }, 0);
+        // Calcular suma total de presupuestos solo para proyectos con rol "IP"
+        const totalBudget = allProjects.data.data
+          .filter(project => project.role === 'IP')
+          .reduce((sum, project) => {
+            return sum + (project.budget || 0);
+          }, 0);
         
         setStats(prev => ({
           ...prev,
@@ -289,7 +291,7 @@ const Home = () => {
             <p className="text-3xl font-bold">
               {stats.totalBudget > 0 ? `€${stats.totalBudget.toLocaleString()}` : '€0'}
             </p>
-            <p className="text-sm opacity-90 mt-1">Suma de todos los presupuestos de los proyectos de investigación en los que se ha participado y/o se ha dirigido</p>
+            <p className="text-sm opacity-90 mt-1">Suma de todos los presupuestos de los proyectos de investigación en los que se ha participado como Investigador Principal</p>
           </div>
           <FolderOpen className="h-8 w-8" />
         </div>
