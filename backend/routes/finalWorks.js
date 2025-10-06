@@ -41,6 +41,7 @@ router.get('/', async (req, res) => {
       page = 1, 
       limit = 10, 
       search = '',
+      type = '',
       sortBy = 'defense_date',
       sortOrder = 'desc'
     } = req.query;
@@ -53,9 +54,13 @@ router.get('/', async (req, res) => {
       const searchRegex = new RegExp(search.trim(), 'i');
       filters.$or = [
         { title: searchRegex },
-        { student_name: searchRegex },
-        { description: searchRegex }
+        { author: searchRegex }
       ];
+    }
+    
+    // Filtro por tipo
+    if (type && type.trim()) {
+      filters.type = type.trim();
     }
 
     // Configurar ordenamiento

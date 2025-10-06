@@ -30,6 +30,8 @@ router.get('/', async (req, res) => {
       academic_year = '',
       course = '',
       type = '',
+      category = '',
+      teaching_language = '',
       sortBy = 'academic_year',
       sortOrder = 'desc'
     } = req.query;
@@ -41,10 +43,9 @@ router.get('/', async (req, res) => {
     if (search && search.trim()) {
       const searchRegex = new RegExp(search.trim(), 'i');
       filters.$or = [
-        { subject_name: searchRegex },
+        { subject: searchRegex },
         { degree: searchRegex },
-        { center: searchRegex },
-        { university: searchRegex }
+        { description: searchRegex }
       ];
     }
     
@@ -60,9 +61,25 @@ router.get('/', async (req, res) => {
       filters.type = type.trim();
     }
 
+    if (category && category.trim()) {
+      filters.category = category.trim();
+    }
+
+    if (teaching_language && teaching_language.trim()) {
+      filters.teaching_language = teaching_language.trim();
+    }
+
     // Configurar ordenamiento
-    const sortOptions = {};
-    sortOptions[sortBy] = sortOrder === 'asc' ? 1 : -1;
+    let sortOptions = {};
+    
+    // Manejo especial para ordenamiento por año académico
+    if (sortBy === 'academic_year') {
+      // Para años académicos, extraemos el primer año para ordenar correctamente
+      // Ej: "2023-2024" -> 2023, "2023/2024" -> 2023
+      sortOptions = { academic_year: sortOrder === 'asc' ? 1 : -1 };
+    } else {
+      sortOptions[sortBy] = sortOrder === 'asc' ? 1 : -1;
+    }
 
     // Configurar paginación
     const pageNum = Math.max(1, parseInt(page));
@@ -74,7 +91,34 @@ router.get('/', async (req, res) => {
       query = query.limit(limitNum).skip((pageNum - 1) * limitNum);
     }
     
-    const teachingClasses = await query.sort(sortOptions);
+    // Para ordenamiento por año académico, usamos aggregate para mejor control
+    let teachingClasses;
+    if (sortBy === 'academic_year') {
+      const aggregationPipeline = [
+        { $match: filters },
+        {
+          $addFields: {
+            // Extraer el primer año del campo academic_year para ordenar correctamente
+            yearForSorting: {
+              $toInt: {
+                $substr: ["$academic_year", 0, 4]
+              }
+            }
+          }
+        },
+        { $sort: { yearForSorting: sortOrder === 'asc' ? 1 : -1 } },
+        { $project: { yearForSorting: 0 } } // Remover el campo temporal
+      ];
+      
+      if (limitNum > 0) {
+        aggregationPipeline.push({ $skip: (pageNum - 1) * limitNum });
+        aggregationPipeline.push({ $limit: limitNum });
+      }
+      
+      teachingClasses = await TeachingClass.aggregate(aggregationPipeline);
+    } else {
+      teachingClasses = await query.sort(sortOptions);
+    }
     const total = await TeachingClass.countDocuments(filters);
 
     res.json({
@@ -195,7 +239,9 @@ router.post('/', [
   body('type').isIn(['theory', 'practice', 'seminar', 'other']).withMessage('Tipo inválido'),
   body('degree').trim().notEmpty().withMessage('El grado es requerido'),
   body('description').optional().trim().isLength({ max: 1000 }).withMessage('La descripción no puede exceder 1000 caracteres'),
-  body('semester').optional().isIn(['1', '2', 'anual', '']).withMessage('Semestre inválido')
+  body('semester').optional().isIn(['1', '2', 'anual', '']).withMessage('Semestre inválido'),
+  body('category').optional().isIn(['ayudantedoctor', 'contratadodoctor', 'titular', 'catedratico', 'otro']).withMessage('La categoría debe ser válida'),
+  body('teaching_language').optional().isIn(['castellano', 'ingles']).withMessage('El idioma debe ser válido')
 ], handleValidationErrors, async (req, res) => {
   try {
     const teachingClass = new TeachingClass(req.body);
@@ -226,7 +272,9 @@ router.put('/:id', [
   body('course').optional().isIn(['1', '2', '3', '4', 'posgrado', 'otros']).withMessage('El curso debe ser válido'),
   body('type').optional().isIn(['theory', 'practice', 'seminar', 'other']).withMessage('Tipo inválido'),
   body('description').optional().trim().isLength({ max: 1000 }).withMessage('La descripción no puede exceder 1000 caracteres'),
-  body('semester').optional().isIn(['1', '2', 'anual', '']).withMessage('Semestre inválido')
+  body('semester').optional().isIn(['1', '2', 'anual', '']).withMessage('Semestre inválido'),
+  body('category').optional().isIn(['ayudantedoctor', 'contratadodoctor', 'titular', 'catedratico', 'otro']).withMessage('La categoría debe ser válida'),
+  body('teaching_language').optional().isIn(['castellano', 'ingles']).withMessage('El idioma debe ser válido')
 ], handleValidationErrors, async (req, res) => {
   try {
     const teachingClass = await TeachingClass.findByIdAndUpdate(

@@ -45,6 +45,16 @@ const teachingClassSchema = new mongoose.Schema({
     type: String,
     enum: ['1', '2', 'anual', ''],
     default: ''
+  },
+  category: {
+    type: String,
+    enum: ['ayudantedoctor', 'contratadodoctor', 'titular', 'catedratico', 'otro'],
+    default: 'titular'
+  },
+  teaching_language: {
+    type: String,
+    enum: ['castellano', 'ingles'],
+    default: 'castellano'
   }
 }, {
   timestamps: true,

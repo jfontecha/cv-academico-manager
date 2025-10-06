@@ -11,6 +11,8 @@ const TeachingClasses = () => {
   // Estados para filtros (no causan re-render de resultados)
   const [filters, setFilters] = useState({
     search: '',
+    category: '',
+    teaching_language: '',
     sortBy: 'academic_year_desc',
     currentPage: 1,
     itemsPerPage: 20
@@ -28,8 +30,16 @@ const TeachingClasses = () => {
       setLoading(true);
       setError(''); // Limpiar errores previos
       
-      // Parse sortBy parameter
-      const [sortField, sortDirection] = filters.sortBy.split('_');
+      // Parse sortBy parameter - manejar campos con guión bajo como academic_year
+      let sortField, sortDirection;
+      if (filters.sortBy.startsWith('academic_year_')) {
+        sortField = 'academic_year';
+        sortDirection = filters.sortBy.replace('academic_year_', '');
+      } else {
+        const parts = filters.sortBy.split('_');
+        sortField = parts[0];
+        sortDirection = parts[1] || 'desc';
+      }
       
       // Construir parámetros de consulta, omitiendo valores vacíos
       const params = {
@@ -42,6 +52,14 @@ const TeachingClasses = () => {
       // Solo agregar parámetros no vacíos
       if (filters.search && filters.search.trim()) {
         params.search = filters.search.trim();
+      }
+      
+      if (filters.category && filters.category.trim()) {
+        params.category = filters.category.trim();
+      }
+      
+      if (filters.teaching_language && filters.teaching_language.trim()) {
+        params.teaching_language = filters.teaching_language.trim();
       }
       
       console.log('Fetching teaching classes with params:', params); // Debug log
@@ -97,6 +115,16 @@ const TeachingClasses = () => {
     updateFilters({ sortBy: value, currentPage: 1 });
   }, [updateFilters]);
 
+  const handleCategoryChange = useCallback((value) => {
+    console.log('Category change:', value); // Debug log
+    updateFilters({ category: value, currentPage: 1 });
+  }, [updateFilters]);
+
+  const handleLanguageChange = useCallback((value) => {
+    console.log('Language change:', value); // Debug log
+    updateFilters({ teaching_language: value, currentPage: 1 });
+  }, [updateFilters]);
+
   useEffect(() => {
     fetchTeachingClasses();
   }, [fetchTeachingClasses]);
@@ -130,6 +158,25 @@ const TeachingClasses = () => {
     return labels[semester] || semester;
   }, []);
 
+  const getCategoryLabel = useCallback((category) => {
+    const labels = {
+      'ayudantedoctor': 'Ayudante Doctor',
+      'contratadodoctor': 'Contratado Doctor Interino',
+      'titular': 'Titular de Universidad',
+      'catedratico': 'Catedrático de Universidad',
+      'otro': 'Otros'
+    };
+    return labels[category] || category;
+  }, []);
+
+  const getLanguageLabel = useCallback((teaching_language) => {
+    const labels = {
+      'castellano': 'Castellano',
+      'ingles': 'Inglés'
+    };
+    return labels[teaching_language] || teaching_language;
+  }, []);
+
   // Memoizar la función de renderizado para evitar re-creación en cada render
   const renderTeachingClass = useCallback((teachingClass) => (
     <div key={teachingClass._id} className="bg-white shadow-lg rounded-lg p-6 border border-gray-200">
@@ -158,6 +205,18 @@ const TeachingClasses = () => {
             {teachingClass.semester && (
               <div>
                 <span className="font-medium">Semestre:</span> {getSemesterLabel(teachingClass.semester)}
+              </div>
+            )}
+
+            {teachingClass.category && (
+              <div>
+                <span className="font-medium">Categoría:</span> {getCategoryLabel(teachingClass.category)}
+              </div>
+            )}
+
+            {teachingClass.language && (
+              <div>
+                <span className="font-medium">Idioma:</span> {getLanguageLabel(teachingClass.teaching_language)}
               </div>
             )}
 
@@ -201,7 +260,7 @@ const TeachingClasses = () => {
         )}
       </div>
     </div>
-  ), [handleDelete, getClassTypeColor, getTypeLabel, getSemesterLabel, canEdit, canDelete]);
+  ), [handleDelete, getClassTypeColor, getTypeLabel, getSemesterLabel, getCategoryLabel, getLanguageLabel, canEdit, canDelete]);
 
   // Memoizar la sección de encabezado para que no se re-renderice
   const headerSection = useMemo(() => (
@@ -222,12 +281,35 @@ const TeachingClasses = () => {
         onSearchChange={handleSearchChange}
         sortBy={filters.sortBy}
         onSortChange={handleSortChange}
-        searchPlaceholder="Buscar por asignatura, grado o tipo..."
+        searchPlaceholder="Buscar por asignatura, grado o descripción..."
         sortOptions={[
           { value: 'academic_year_desc', label: 'Año más reciente' },
           { value: 'academic_year_asc', label: 'Año más antiguo' },
           { value: 'subject_asc', label: 'Asignatura A-Z' },
           { value: 'subject_desc', label: 'Asignatura Z-A' }
+        ]}
+        additionalFilters={[
+          {
+            value: filters.category,
+            onChange: handleCategoryChange,
+            options: [
+              { value: '', label: 'Todas las categorías' },
+              { value: 'ayudantedoctor', label: 'Ayudante Doctor' },
+              { value: 'contratadodoctor', label: 'Contratado Doctor Interino' },
+              { value: 'titular', label: 'Titular de Universidad' },
+              { value: 'catedratico', label: 'Catedrático de Universidad' },
+              { value: 'otro', label: 'Otros' }
+            ]
+          },
+          {
+            value: filters.teaching_language,
+            onChange: handleLanguageChange,
+            options: [
+              { value: '', label: 'Todos los idiomas' },
+              { value: 'castellano', label: 'Castellano' },
+              { value: 'ingles', label: 'Inglés' }
+            ]
+          }
         ]}
         itemsPerPage={filters.itemsPerPage}
         onItemsPerPageChange={handleItemsPerPageChange}
@@ -250,8 +332,12 @@ const TeachingClasses = () => {
     canCreate,
     handleSearchChange, 
     handleSortChange, 
+    handleCategoryChange,
+    handleLanguageChange,
     handleItemsPerPageChange, 
     filters.sortBy, 
+    filters.category,
+    filters.teaching_language,
     filters.itemsPerPage,
     teachingClasses.length,
     totalItems

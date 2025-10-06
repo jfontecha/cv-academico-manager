@@ -226,13 +226,7 @@ const FinalWorks = () => {
         searchPlaceholder="Buscar por título, autor..."
         sortOptions={[
           { value: 'defense_date_desc', label: 'Fecha defensa más reciente' },
-          { value: 'defense_date_asc', label: 'Fecha defensa más antigua' },
-          { value: 'title_asc', label: 'Título A-Z' },
-          { value: 'title_desc', label: 'Título Z-A' },
-          { value: 'author_asc', label: 'Autor A-Z' },
-          { value: 'author_desc', label: 'Autor Z-A' },
-          { value: 'type_asc', label: 'Tipo A-Z' },
-          { value: 'type_desc', label: 'Tipo Z-A' }
+          { value: 'defense_date_asc', label: 'Fecha defensa más antigua' }
         ]}
         additionalFilters={[
           {

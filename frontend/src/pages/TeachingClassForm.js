@@ -16,7 +16,9 @@ const TeachingClassForm = () => {
     course: '1',
     semester: '',
     type: 'theory',
-    description: ''
+    description: '',
+    category: 'titular',
+    teaching_language: 'castellano'
   });
 
   const [loading, setLoading] = useState(false);
@@ -41,7 +43,9 @@ const TeachingClassForm = () => {
         course: teachingClass.course || '1',
         semester: teachingClass.semester || '',
         type: teachingClass.type || 'theory',
-        description: teachingClass.description || ''
+        description: teachingClass.description || '',
+        category: teachingClass.category || 'titular',
+        teaching_language: teachingClass.teaching_language || 'castellano'
       });
     } catch (err) {
       setError('Error al cargar la clase');
@@ -99,6 +103,19 @@ const TeachingClassForm = () => {
     { value: '1', label: 'Primer Semestre' },
     { value: '2', label: 'Segundo Semestre' },
     { value: 'anual', label: 'Anual' }
+  ];
+
+  const categories = [
+    { value: 'ayudantedoctor', label: 'Ayudante Doctor' },
+    { value: 'contratadodoctor', label: 'Contratado Doctor Interino' },
+    { value: 'titular', label: 'Titular de Universidad' },
+    { value: 'catedratico', label: 'Catedrático de Universidad' },
+    { value: 'otro', label: 'Otros' }
+  ];
+
+  const languages = [
+    { value: 'castellano', label: 'Castellano' },
+    { value: 'ingles', label: 'Inglés' }
   ];
 
   if (loading && isEditing) {
@@ -235,6 +252,42 @@ const TeachingClassForm = () => {
             >
               {classTypes.map(type => (
                 <option key={type.value} value={type.value}>{type.label}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* Categoría */}
+          <div>
+            <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-2">
+              Categoría Docente
+            </label>
+            <select
+              id="category"
+              name="category"
+              value={formData.category}
+              onChange={handleChange}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+            >
+              {categories.map(category => (
+                <option key={category.value} value={category.value}>{category.label}</option>
+              ))}
+            </select>
+          </div>
+
+          {/* Idioma */}
+          <div>
+            <label htmlFor="teaching_language" className="block text-sm font-medium text-gray-700 mb-2">
+              Idioma de Impartición
+            </label>
+            <select
+              id="teaching_language"
+              name="teaching_language"
+              value={formData.teaching_language}
+              onChange={handleChange}
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
+            >
+              {languages.map(language => (
+                <option key={language.value} value={language.value}>{language.label}</option>
               ))}
             </select>
           </div>
